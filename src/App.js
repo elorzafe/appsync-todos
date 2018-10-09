@@ -1,28 +1,40 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import './App.css'
+
+import AWSAppSyncClient from 'aws-appsync'
+import { graphqlMutation, Rehydrated } from 'aws-appsync-react'
+import React, { Component } from 'react'
+import { ApolloProvider, graphql } from 'react-apollo'
+
+import AppSyncConfig from './aws-exports'
+import ListTodos from './GraphQLAllTodos'
+import NewTodo from './GraphQLNewTodo'
 
 class App extends Component {
   render() {
     return (
       <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
+        <AllTodosWithData />
+        <AddTodoOffline />
       </div>
     );
   }
 }
 
-export default App;
+const client = new AWSAppSyncClient({
+  url: AppSyncConfig.graphqlEndpoint,
+  region: AppSyncConfig.region,
+  auth: {
+    type: AppSyncConfig.authenticationType,
+    apiKey: AppSyncConfig.apiKey
+  }
+});
+
+const WithProvider = () => (
+  <ApolloProvider client={client}>
+    <Rehydrated>
+      <App />
+    </Rehydrated>
+  </ApolloProvider>
+);
+
+export default WithProvider;
