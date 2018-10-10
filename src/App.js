@@ -4,10 +4,13 @@ import AWSAppSyncClient from 'aws-appsync'
 import { graphqlMutation, Rehydrated } from 'aws-appsync-react'
 import React, { Component } from 'react'
 import { ApolloProvider, graphql } from 'react-apollo'
+import { buildSubscription } from 'aws-appsync'
 
 import AppSyncConfig from './aws-exports'
 import ListTodos from './GraphQLAllTodos'
 import NewTodo from './GraphQLNewTodo'
+import TodoSubscription from './GrapqQLSubTodo'
+
 
 class AddTodo extends Component {
   state = { name: "", description: "" };
@@ -48,6 +51,12 @@ const AddTodoOffline = graphqlMutation(NewTodo, ListTodos, "Todo")(AddTodo);
 // - An operationType override if you do not want to infer actions such as "add" or "update" from the mutation name
 
 class Todos extends Component {
+  componentDidMount() {
+    this.props.data.subscribeToMore(
+      buildSubscription(TodoSubscription, ListTodos)
+    )
+  }
+  
   render() {
     const { listTodos, refetch } = this.props.data;
     return (
